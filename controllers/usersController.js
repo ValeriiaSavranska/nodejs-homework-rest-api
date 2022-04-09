@@ -3,6 +3,7 @@ const {
   loginUser,
   logoutUser,
   patchUser,
+  updateAvatar,
 } = require("../services/usersService");
 
 const singupController = async (req, res, next) => {
@@ -41,10 +42,17 @@ const patchUserController = async (req, res, next) => {
   res.status(200).json({ user: updatedUser });
 };
 
+const avatarUserController = async (req, res, next) => {
+  const newFilePath = await updateAvatar(req.user, req.file);
+
+  res.json({ avatarURL: newFilePath });
+};
+
 module.exports = {
   singupController,
   loginController,
   logoutController,
   currentUserController,
   patchUserController,
+  avatarUserController,
 };
