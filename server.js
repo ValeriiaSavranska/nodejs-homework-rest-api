@@ -1,7 +1,7 @@
 require("dotenv").config();
 
 const app = require("./app");
-const { connectMobgoDB } = require("./db/connection");
+const { connectMobgoDB } = require("./src/db/connection");
 
 const PORT = process.env.PORT || 3001;
 

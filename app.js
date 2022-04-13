@@ -3,9 +3,9 @@ const logger = require("morgan");
 const cors = require("cors");
 const path = require("path");
 
-const contactsRouter = require("./routes/api/contactsRouter");
-const usersRouter = require("./routes/api/usersRouter");
-const { errorHandler } = require("./helpers/apiHelpers");
+const contactsRouter = require("./src/routes/api/contactsRouter");
+const usersRouter = require("./src/routes/api/usersRouter");
+const { errorHandler } = require("./src/helpers/apiHelpers");
 
 const app = express();
 
