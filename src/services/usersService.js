@@ -5,9 +5,13 @@ const path = require("path");
 const fs = require("fs").promises;
 const gravatar = require("gravatar");
 const Jimp = require("jimp");
+const sgMail = require("@sendgrid/mail");
+const { v4: uuidv4 } = require("uuid");
 
 const { User } = require("../db/userModel");
 const {
+  ValidationError,
+  InvalidUserDataError,
   DuplicationEmailError,
   UnauthorizedError,
 } = require("../helpers/errors");
@@ -23,9 +27,27 @@ const registrationUser = async (body) => {
   }
 
   const avatarURL = gravatar.url(email, { protocol: "http", s: "100" });
+  const verificationToken = uuidv4();
 
-  const user = new User({ email, password, avatarURL });
+  const user = new User({ email, password, avatarURL, verificationToken });
   await user.save();
+
+  sgMail.setApiKey(process.env.SENDGRID_API_TOKEN);
+  const msg = {
+    to: email,
+    from: "rogvaleria59@gmail.com",
+    subject: "Сonfirm your mail",
+    text: "link for email verification",
+    html: `<strong>Link for email verification :</strong><a href="http://localhost:3000/api/users/verify/${verificationToken}">go for confirmation</a>`,
+  };
+  sgMail
+    .send(msg)
+    .then(() => {
+      console.log("Email sent");
+    })
+    .catch((error) => {
+      console.error(error);
+    });
 
   return user;
 };
@@ -38,9 +60,15 @@ const loginUser = async (body) => {
     throw new UnauthorizedError("Email or password is wrong");
   }
 
+  if (user.verify === false) {
+    throw new UnauthorizedError("You must confirm your email to log in");
+  }
+
   if (!(await bcrypt.compare(password, user.password))) {
     throw new UnauthorizedError("Email or password is wrong");
   }
+
+  console.log(user);
 
   const token = jwt.sign(
     {
@@ -99,10 +127,56 @@ const updateAvatar = async (user, file) => {
   return fileName;
 };
 
+const verifyUser = async (body) => {
+  const { email } = body;
+
+  if (!email) {
+    throw new ValidationError("Missing required field email");
+  }
+
+  const user = await User.findOne({ email });
+
+  if (user.verify === true) {
+    throw new ValidationError("Verification has already been passed");
+  }
+
+  sgMail.setApiKey(process.env.SENDGRID_API_TOKEN);
+  const msg = {
+    to: email,
+    from: "rogvaleria59@gmail.com",
+    subject: "Сonfirm your mail",
+    text: "link for email verification",
+    html: `<strong>Link for email verification :</strong><a href="http://localhost:3000/api/users/verify/${user.verificationToken}">go for confirmation</a>`,
+  };
+  sgMail
+    .send(msg)
+    .then(() => {
+      console.log("Email sent");
+    })
+    .catch((error) => {
+      console.error(error);
+    });
+};
+
+const verificationUserToken = async (verificationToken) => {
+  const user = await User.findOne({ verificationToken });
+
+  if (!user) {
+    throw new InvalidUserDataError("User not found");
+  }
+
+  user.verificationToken = "null";
+  user.verify = true;
+
+  await user.save();
+};
+
 module.exports = {
   registrationUser,
   loginUser,
   logoutUser,
   patchUser,
   updateAvatar,
+  verifyUser,
+  verificationUserToken,
 };

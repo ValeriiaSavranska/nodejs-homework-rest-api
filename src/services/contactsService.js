@@ -1,5 +1,5 @@
 const { Contact } = require("../db/contactModel");
-const { WrongIdError } = require("../helpers/errors");
+const { InvalidUserDataError } = require("../helpers/errors");
 
 const listContacts = async (owner, { skip, limit, favorite }) => {
   const contacts = await Contact.find({
@@ -17,7 +17,7 @@ const getContactById = async (owner, contactId) => {
     const contact = await Contact.findOne({ owner, _id: contactId });
     return contact;
   } catch (error) {
-    throw new WrongIdError("Not found");
+    throw new InvalidUserDataError("Not found");
   }
 };
 
@@ -45,7 +45,7 @@ const changeContactById = async (owner, contactId, body) => {
     const changeContact = await Contact.findOne({ owner, _id: contactId });
     return changeContact;
   } catch (error) {
-    throw new WrongIdError("Not found");
+    throw new InvalidUserDataError("Not found");
   }
 };
 
@@ -60,7 +60,7 @@ const patchContactById = async (owner, contactId, body) => {
     const updateContact = await Contact.findOne({ owner, _id: contactId });
     return updateContact;
   } catch (error) {
-    throw new WrongIdError("Not found");
+    throw new InvalidUserDataError("Not found");
   }
 };
 
@@ -68,7 +68,7 @@ const removeContactById = async (owner, contactId) => {
   try {
     await Contact.findOneAndRemove({ owner, _id: contactId });
   } catch (error) {
-    throw new WrongIdError("Not found");
+    throw new InvalidUserDataError("Not found");
   }
 };
 

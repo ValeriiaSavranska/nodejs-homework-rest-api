@@ -5,7 +5,7 @@ class ValidationError extends Error {
   }
 }
 
-class WrongIdError extends Error {
+class InvalidUserDataError extends Error {
   constructor(message) {
     super(message);
     this.status = 404;
@@ -28,7 +28,7 @@ class UnauthorizedError extends Error {
 
 module.exports = {
   ValidationError,
-  WrongIdError,
+  InvalidUserDataError,
   DuplicationEmailError,
   UnauthorizedError,
 };

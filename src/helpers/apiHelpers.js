@@ -1,6 +1,6 @@
 const {
   ValidationError,
-  WrongIdError,
+  InvalidUserDataError,
   DuplicationEmailError,
   UnauthorizedError,
 } = require("./errors");
@@ -14,7 +14,7 @@ const asyncWrapper = (controller) => {
 const errorHandler = (error, req, res, next) => {
   if (
     error instanceof ValidationError ||
-    error instanceof WrongIdError ||
+    error instanceof InvalidUserDataError ||
     error instanceof DuplicationEmailError ||
     error instanceof UnauthorizedError
   ) {
